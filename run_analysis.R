@@ -17,12 +17,19 @@ merged.y <- rbind(test.y, train.y)
 
 colnames(merged.y) <- c("Activity")
 
-merged.y[merged.y$Activity == "1", ] <- "Walking"
-merged.y[merged.y$Activity == "2", ] <- "Walking Upstairs"
-merged.y[merged.y$Activity == "3", ] <- "Walking Downstairs"
-merged.y[merged.y$Activity == "4", ] <- "Sitting"
-merged.y[merged.y$Activity == "5", ] <- "Standing"
-merged.y[merged.y$Activity == "6", ] <- "Laying"
+descriptive.activity.names <- list(
+  "1", "Walking",
+  "2", "Walking Upstairs",
+  "3", "Walking Downstairs",
+  "4", "Sitting",
+  "5", "Standing",
+  "6", "Laying")
+
+for(i in seq(1, length(descriptive.activity.names), by=2)) {
+  code <- descriptive.activity.names[[i]]
+  name <- descriptive.activity.names[[i+1]]
+  merged.y[merged.y$Activity == code, ] <- name
+}
 
 
 # Read and massage the subject IDs
@@ -35,10 +42,10 @@ colnames(merged.subject) <- c("Subject")
 
 # Combine and output the observation detail
 tidy = cbind(merged.subject, merged.y, mean.and.std.X)
-write.csv(tidy, 'observation_detail.csv', row.names = FALSE)
+write.table(tidy, 'observation_detail.txt', row.names = FALSE)
 
 
 # Re-cast the tidy frame to get mean values by Subject and Activity
 tidy.melted <- melt(tidy, c("Subject", "Activity"))
 summarized <- dcast(tidy.melted, Subject + Activity ~ variable, mean)
-write.csv(summarized, 'observation_summary.csv', row.names = FALSE)
+write.table(summarized, 'observation_summary.txt', row.names = FALSE)
