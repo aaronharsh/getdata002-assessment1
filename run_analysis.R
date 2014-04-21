@@ -33,25 +33,12 @@ merged.subject <- rbind(test.subject, train.subject)
 colnames(merged.subject) <- c("Subject")
 
 
-
-
-
-
 # Combine and output the observation detail
 tidy = cbind(merged.subject, merged.y, mean.and.std.X)
-write.csv(tidy, 'detail_activity.csv', row.names = FALSE)
+write.csv(tidy, 'observation_detail.csv', row.names = FALSE)
 
 
-summarized <- tidy[c(),]
-
-subject.activities <- head(unique(tidy[c("Subject", "Activity")]))
-for(i in 1:nrow(subject.activities)) {
-  row <- subject.activities[i,]
-  massaged <- list(row$Subject, row$Activity)
-  
-  matching.detail <- tidy[tidy$Subject == row$Subject & tidy$Activity == row$Activity,]
-  message(nrow(matching.detail))
-  
-  massaged <- c(massaged, lapply(mean.std.column.names.X, function (col) { mean(matching.detail[[col]]) }))
-  summarized <- rbind(summarized, massaged)
-}
+# Re-cast the tidy frame to get mean values by Subject and Activity
+tidy.melted <- melt(tidy, c("Subject", "Activity"))
+summarized <- dcast(tidy.melted, Subject + Activity ~ variable, mean)
+write.csv(summarized, 'observation_summary.csv', row.names = FALSE)
